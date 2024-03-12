@@ -19,6 +19,12 @@
                 top: 0px;
                 left: 0px;
             }
+            #banner-container {
+                position: absolute;
+                bottom: 0px;
+                width: 100%;
+                height: 90px;
+            }
             #loading-overlay {
                 font-size: 20px;
                 z-index: 1;
@@ -49,6 +55,7 @@
     </head>
     <body>
         <canvas id="canvas" class="fullscreen"></canvas>
+        <div id="banner-container" style="display: none"></div>
         <div id="loading-overlay" class="fullscreen">
             <img id="icon" src="./icon.png" />
             <div id="progress-bar"><div id="progress-bar-fill"></div></div>
@@ -65,6 +72,7 @@
             let canvas = document.getElementById('canvas')
             let loadingOverlay = document.getElementById('loading-overlay')
             let progressBarFill = document.getElementById('progress-bar-fill')
+            let bannerContainer = document.getElementById('banner-container')
 
             const STORAGE_DATA_SEPARATOR = '{bridge_data_separator}'
             const STORAGE_KEYS_SEPARATOR = '{bridge_keys_separator}'
@@ -103,11 +111,11 @@
                 progressBarFill.style.width = `${ currentPercent }%`
                 progressBarFillingInterval = setInterval(() => {
                     currentPercent++
-                    if (currentPercent > 99) {
-                        currentPercent = 99
+                    if (currentPercent > 100) {
+                        currentPercent = 100
                     }
 
-                    progressBarFill.style.width = `${ currentPercent + 1 }%`
+                    progressBarFill.style.width = `${ currentPercent }%`
 
                     if (currentPercent >= 100) {
                         clearInterval(progressBarFillingInterval)
@@ -123,27 +131,43 @@
             })
 
 
+            let bridgeOptions = {
+                platforms: {
+                    'game_distribution': {
+                        gameId: '0'
+                    }
+                    'vk_play': {
+                        gameId: '33377'
+                    }
+                }
+            }
+
             // initialization
             bridge
-                .initialize()
+                .initialize(bridgeOptions)
                 .then(() => {
+                    bridge.advertisement.on('banner_state_changed', state => sendMessageToUnity('OnBannerStateChanged', state))
                     bridge.advertisement.on('interstitial_state_changed', state => sendMessageToUnity('OnInterstitialStateChanged', state))
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
+                    if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                        bridge.advertisement.showInterstitial()
+                    }
+
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/webGL.loader.js'
+                    unityLoader.src = 'Build/web.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/webGL.data.unityweb',
-                                frameworkUrl: 'Build/webGL.framework.js.unityweb',
-                                codeUrl: 'Build/webGL.wasm.unityweb',
+                                dataUrl: 'Build/web.data.unityweb',
+                                frameworkUrl: 'Build/web.framework.js.unityweb',
+                                codeUrl: 'Build/web.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'Fill the honeycomb!!!',
-                                productVersion: '1.2.38',
+                                productVersion: '1.3.40',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -158,10 +182,6 @@
                             })
                     }
                     document.body.appendChild(unityLoader)
-					
-					if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX) {
-						bridge.advertisement.showInterstitial()
-					}
                 })
                 .catch(error => console.error(error))
             
@@ -182,6 +202,19 @@
                 } else {
                     return ''
                 }
+            }
+
+            window.getPlatformTld = function() {
+                let tld = bridge.platform.tld
+                if (typeof tld === 'string') {
+                    return tld
+                } else {
+                    return ''
+                }
+            }
+
+            window.sendMessageToPlatform = function(message) {
+                bridge.platform.sendMessage(message)
             }
 
 
@@ -225,7 +258,11 @@
             }
 
             window.authorizePlayer = function(options) {
-                bridge.player.authorize(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.player.authorize(options)
                     .then(() => {
                         sendMessageToUnity('OnAuthorizeCompleted', 'true')
                     })
@@ -248,6 +285,10 @@
 
             window.getIsStorageSupported = function(storageType) {
                 return bridge.storage.isSupported(storageType).toString()
+            }
+
+            window.getIsStorageAvailable = function(storageType) {
+                return bridge.storage.isAvailable(storageType).toString()
             }
 
             window.getStorageData = function(key, storageType) {
@@ -316,12 +357,16 @@
 
 
             // advertisement
-            window.getIsBannerSupported = function() {
-                return bridge.advertisement.isBannerSupported.toString()
+            window.getInterstitialState = function() {
+                if (bridge.advertisement.interstitialState) {
+                    return bridge.advertisement.interstitialState
+                } else {
+                    return ''
+                }
             }
 
-            window.getIsBannerShowing = function() {
-                return bridge.advertisement.isBannerShowing.toString()
+            window.getIsBannerSupported = function() {
+                return bridge.advertisement.isBannerSupported.toString()
             }
             
             window.getMinimumDelayBetweenInterstitial = function() {
@@ -329,47 +374,55 @@
             }
 
             window.setMinimumDelayBetweenInterstitial = function(options) {
-                bridge.advertisement.setMinimumDelayBetweenInterstitial(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { }
+                }
+                
+                bridge.advertisement.setMinimumDelayBetweenInterstitial(options)
             }
 
             window.showBanner = function(options) {
-                bridge.advertisement.showBanner(JSON.parse(options))
-                    .then(() => {
-                        sendMessageToUnity('OnShowBannerCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnShowBannerCompleted', 'false')
-                    })
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { }
+                }
+
+                if (bridge.platform.id === bridge.PLATFORM_ID.CRAZY_GAMES || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                    bannerContainer.style.display = 'block'
+                }
+
+                options['crazy_games'] = {
+                    containerId: 'banner-container'
+                }
+
+                options['game_distribution'] = {
+                    containerId: 'banner-container'
+                }
+
+                bridge.advertisement.showBanner(options)
             }
 
             window.hideBanner = function() {
+                if (bridge.platform.id === bridge.PLATFORM_ID.CRAZY_GAMES || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                    bannerContainer.style.display = 'none'
+                }
+
                 bridge.advertisement.hideBanner()
-                    .then(() => {
-                        sendMessageToUnity('OnHideBannerCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnHideBannerCompleted', 'false')
-                    })
             }
 
             window.showInterstitial = function(options) {
-                bridge.advertisement.showInterstitial(JSON.parse(options))
-                    .then(() => {
-                        sendMessageToUnity('OnShowInterstitialCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnShowInterstitialCompleted', 'false')
-                    })
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.advertisement.showInterstitial(options)
             }
 
             window.showRewarded = function() {
                 bridge.advertisement.showRewarded()
-                    .then(() => {
-                        sendMessageToUnity('OnShowRewardedCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnShowRewardedCompleted', 'false')
-                    })
             }
 
 
@@ -402,8 +455,16 @@
                 return bridge.social.isRateSupported.toString()
             }
 
+            window.getIsExternalLinksAllowed = function() {
+                return bridge.social.isExternalLinksAllowed.toString()
+            }
+
             window.share = function(options) {
-                bridge.social.share(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.share(options)
                     .then(() => {
                         sendMessageToUnity('OnShareCompleted', 'true')
                     })
@@ -423,7 +484,11 @@
             }
 
             window.joinCommunity = function(options) {
-                bridge.social.joinCommunity(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.joinCommunity(options)
                     .then(() => {
                         sendMessageToUnity('OnJoinCommunityCompleted', 'true')
                     })
@@ -433,7 +498,11 @@
             }
 
             window.createPost = function(options) {
-                bridge.social.createPost(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.createPost(options)
                     .then(() => {
                         sendMessageToUnity('OnCreatePostCompleted', 'true')
                     })
@@ -499,7 +568,11 @@
             }
 
             window.leaderboardSetScore = function(options) {
-                bridge.leaderboard.setScore(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.setScore(options)
                     .then(() => {
                         sendMessageToUnity('OnLeaderboardSetScoreCompleted', 'true')
                     })
@@ -509,7 +582,11 @@
             }
 
             window.leaderboardGetScore = function(options) {
-                bridge.leaderboard.getScore(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.getScore(options)
                     .then(data => {
                         if (data) {
                             if (typeof data !== 'string') {
@@ -527,7 +604,11 @@
             }
 
             window.leaderboardGetEntries = function(options) {
-                bridge.leaderboard.getEntries(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.getEntries(options)
                     .then(data => {
                         if (data) {
                             if (typeof data !== 'string') {
@@ -545,7 +626,11 @@
             }
 
             window.leaderboardShowNativePopup = function(options) {
-                bridge.leaderboard.showNativePopup(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.showNativePopup(options)
                     .then(() => {
                         sendMessageToUnity('OnLeaderboardShowNativePopupCompleted', 'true')
                     })
@@ -553,6 +638,103 @@
                         sendMessageToUnity('OnLeaderboardShowNativePopupCompleted', 'false')
                     })
             }
+
+            window.getIsPaymentsSupported = function() {
+                return bridge.payments.isSupported.toString()
+            }
+
+            window.paymentsPurchase = function(purchaseId) {
+                bridge.payments.purchase(purchaseId)
+                    .then(() => {
+                        sendMessageToUnity('OnPaymentsPurchaseCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsPurchaseCompleted', 'false')
+                    })
+            }
+
+            window.paymentsConsumePurchase = function(purchaseToken) {
+                bridge.payments.consumePurchase(purchaseToken)
+                    .then(() => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'false')
+                    })
+            }
+
+            window.paymentsGetCatalog = function() {
+                bridge.payments.getCatalog()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            data = data.replaceAll('imageURI', 'icon')
+
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetCatalogCompletedFailed', 'false')
+                    })
+            }
+
+            window.paymentsGetPurchases = function() {
+                bridge.payments.getPurchases()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            data = data.replaceAll('productID', 'id')
+                            data = data.replaceAll('purchaseToken', 'token')
+
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetPurchasesCompletedFailed', 'false')
+                    })
+            }
+
+            window.getIsRemoteConfigSupported = function() {
+                return bridge.remoteConfig.isSupported.toString()
+            }
+
+            window.remoteConfigGet = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { clientFeatures: [] }
+                }
+
+                bridge.remoteConfig.get(options)
+                    .then(data => {
+                        let keys = Object.keys(data)
+                        let values = []
+
+                        for (let i = 0; i < keys.length; i++) {
+                            let name = keys[i]
+                            let value = data[name]
+                            values.push({ name, value })
+                        }
+
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', JSON.stringify(values))
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnRemoteConfigGetFailed', '')
+                    })
+            }
         </script>
+        
+        <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
+        <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
 </html>
