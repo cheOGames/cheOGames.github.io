@@ -156,14 +156,14 @@
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/web.loader.js'
+                    unityLoader.src = 'Build/webGL.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/web.data.unityweb',
-                                frameworkUrl: 'Build/web.framework.js.unityweb',
-                                codeUrl: 'Build/web.wasm.unityweb',
+                                dataUrl: 'Build/webGL.data.unityweb',
+                                frameworkUrl: 'Build/webGL.framework.js.unityweb',
+                                codeUrl: 'Build/webGL.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'Fill the honeycomb!!!',
