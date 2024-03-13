@@ -24,7 +24,6 @@
                 bottom: 0px;
                 width: 100%;
                 height: 90px;
-                display: none;
             }
             #loading-overlay {
                 font-size: 20px;
@@ -56,7 +55,7 @@
     </head>
     <body>
         <canvas id="canvas" class="fullscreen"></canvas>
-        <div id="banner-container"></div>
+        <div id="banner-container" style="display: none"></div>
         <div id="loading-overlay" class="fullscreen">
             <img id="icon" src="./icon.png" />
             <div id="progress-bar"><div id="progress-bar-fill"></div></div>
@@ -134,8 +133,8 @@
 
             let bridgeOptions = {
                 platforms: {
-                    'game_distribution': {
-                        gameId: 'b026f629e24945f2a9105a3264b6f084'
+                    'vk_play': {
+                        gameId: '33377'
                     }
                 }
             }
@@ -149,19 +148,23 @@
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
+                    if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                        bridge.advertisement.showInterstitial()
+                    }
+
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/web.loader.js'
+                    unityLoader.src = 'Build/webGL.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/web.data.unityweb',
-                                frameworkUrl: 'Build/web.framework.js.unityweb',
-                                codeUrl: 'Build/web.wasm.unityweb',
+                                dataUrl: 'Build/webGL.data.unityweb',
+                                frameworkUrl: 'Build/webGL.framework.js.unityweb',
+                                codeUrl: 'Build/webGL.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'knife_thrower',
-                                productVersion: '1.2.22',
+                                productVersion: '1.2.33',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -351,6 +354,14 @@
 
 
             // advertisement
+            window.getInterstitialState = function() {
+                if (bridge.advertisement.interstitialState) {
+                    return bridge.advertisement.interstitialState
+                } else {
+                    return ''
+                }
+            }
+
             window.getIsBannerSupported = function() {
                 return bridge.advertisement.isBannerSupported.toString()
             }
@@ -360,7 +371,13 @@
             }
 
             window.setMinimumDelayBetweenInterstitial = function(options) {
-                bridge.advertisement.setMinimumDelayBetweenInterstitial(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { }
+                }
+                
+                bridge.advertisement.setMinimumDelayBetweenInterstitial(options)
             }
 
             window.showBanner = function(options) {
@@ -618,6 +635,103 @@
                         sendMessageToUnity('OnLeaderboardShowNativePopupCompleted', 'false')
                     })
             }
+
+            window.getIsPaymentsSupported = function() {
+                return bridge.payments.isSupported.toString()
+            }
+
+            window.paymentsPurchase = function(purchaseId) {
+                bridge.payments.purchase(purchaseId)
+                    .then(() => {
+                        sendMessageToUnity('OnPaymentsPurchaseCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsPurchaseCompleted', 'false')
+                    })
+            }
+
+            window.paymentsConsumePurchase = function(purchaseToken) {
+                bridge.payments.consumePurchase(purchaseToken)
+                    .then(() => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'false')
+                    })
+            }
+
+            window.paymentsGetCatalog = function() {
+                bridge.payments.getCatalog()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            data = data.replaceAll('imageURI', 'icon')
+
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetCatalogCompletedFailed', 'false')
+                    })
+            }
+
+            window.paymentsGetPurchases = function() {
+                bridge.payments.getPurchases()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            data = data.replaceAll('productID', 'id')
+                            data = data.replaceAll('purchaseToken', 'token')
+
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetPurchasesCompletedFailed', 'false')
+                    })
+            }
+
+            window.getIsRemoteConfigSupported = function() {
+                return bridge.remoteConfig.isSupported.toString()
+            }
+
+            window.remoteConfigGet = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { clientFeatures: [] }
+                }
+
+                bridge.remoteConfig.get(options)
+                    .then(data => {
+                        let keys = Object.keys(data)
+                        let values = []
+
+                        for (let i = 0; i < keys.length; i++) {
+                            let name = keys[i]
+                            let value = data[name]
+                            values.push({ name, value })
+                        }
+
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', JSON.stringify(values))
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnRemoteConfigGetFailed', '')
+                    })
+            }
         </script>
+        
+        <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
+        <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
 </html>
