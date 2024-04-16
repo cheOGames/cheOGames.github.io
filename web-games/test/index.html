@@ -39,14 +39,15 @@
                 margin-bottom: 20px;
             }
             #progress-bar {
-                border-radius: 25px;
-                width: 50%;
-                height: 30px;
+                border-radius: 5px;
+                width: 90%;
+                max-width: 250px;
+                height: 20px;
                 background: gold;
-                padding: 8px;
+                padding: 5px;
             }
             #progress-bar-fill {
-                border-radius: 25px;
+                border-radius: 3px;
                 width: 0%;
                 height: 100%;
                 background: blue;
@@ -135,7 +136,7 @@
                 platforms: {
                     'vk_play': {
                         gameId: '33377'
-                    }
+                    },
                 }
             }
 
@@ -164,7 +165,7 @@
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'CheOGames',
                                 productName: 'cheOGmanager',
-                                productVersion: '1.2.34',
+                                productVersion: '1.2.35',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -730,8 +731,5 @@
                     })
             }
         </script>
-        
-        <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
-        <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
 </html>
