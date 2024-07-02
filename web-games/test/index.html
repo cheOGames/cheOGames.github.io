@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>cheOGmanager</title>
+        <title>cheo-game-manager</title>
         <style>
             html, body {
                 width: 100%;
@@ -12,7 +12,7 @@
                 margin: 0px;
             }
             .fullscreen {
-                background: silver;
+                background: #383838;
                 width: 100%;
                 height: 100%;
                 position: absolute;
@@ -42,14 +42,14 @@
                 border-radius: 25px;
                 width: 50%;
                 height: 30px;
-                background: gold;
+                background: #242424;
                 padding: 8px;
             }
             #progress-bar-fill {
                 border-radius: 25px;
                 width: 0%;
                 height: 100%;
-                background: blue;
+                background: #FF9A00;
             }
         </style>
     </head>
@@ -153,18 +153,18 @@
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/26997520ee5216742b857423ffe8a879.loader.js'
+                    unityLoader.src = 'Build/web.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/eb7744e5ac10175888fa4df5d9a852f1.data.unityweb',
-                                frameworkUrl: 'Build/0783f92efcbc8a496c17a99b5c75ae6b.framework.js.unityweb',
-                                codeUrl: 'Build/4165683057d8ff1740dad702fa0d474f.wasm.unityweb',
+                                dataUrl: 'Build/web.data.gz',
+                                frameworkUrl: 'Build/web.framework.js.gz',
+                                codeUrl: 'Build/web.wasm.gz',
                                 streamingAssetsUrl: 'StreamingAssets',
-                                companyName: 'CheOGames',
-                                productName: 'cheOGmanager',
-                                productVersion: '1.2.38',
+                                companyName: 'cheoGames',
+                                productName: 'cheo-game-manager',
+                                productVersion: '1.2.46',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -371,12 +371,6 @@
             }
 
             window.setMinimumDelayBetweenInterstitial = function(options) {
-                if (options) {
-                    options = JSON.parse(options)
-                } else {
-                    options = { }
-                }
-                
                 bridge.advertisement.setMinimumDelayBetweenInterstitial(options)
             }
 
@@ -410,12 +404,8 @@
                 bridge.advertisement.hideBanner()
             }
 
-            window.showInterstitial = function(options) {
-                if (options) {
-                    options = JSON.parse(options)
-                }
-
-                bridge.advertisement.showInterstitial(options)
+            window.showInterstitial = function() {
+                bridge.advertisement.showInterstitial()
             }
 
             window.showRewarded = function() {
@@ -470,8 +460,12 @@
                     })
             }
 
-            window.inviteFriends = function() {
-                bridge.social.inviteFriends()
+            window.inviteFriends = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.social.inviteFriends(options)
                     .then(() => {
                         sendMessageToUnity('OnInviteFriendsCompleted', 'true')
                     })
@@ -546,10 +540,6 @@
 
             window.getIsLeaderboardNativePopupSupported = function() {
                 return bridge.leaderboard.isNativePopupSupported.toString()
-            }
-
-            window.getIsLeaderboardMultipleBoardsSupported = function() {
-                return bridge.leaderboard.isMultipleBoardsSupported.toString()
             }
 
             window.getIsLeaderboardSetScoreSupported = function() {
@@ -640,8 +630,12 @@
                 return bridge.payments.isSupported.toString()
             }
 
-            window.paymentsPurchase = function(purchaseId) {
-                bridge.payments.purchase(purchaseId)
+            window.paymentsPurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.purchase(options)
                     .then(() => {
                         sendMessageToUnity('OnPaymentsPurchaseCompleted', 'true')
                     })
@@ -650,8 +644,12 @@
                     })
             }
 
-            window.paymentsConsumePurchase = function(purchaseToken) {
-                bridge.payments.consumePurchase(purchaseToken)
+            window.paymentsConsumePurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.consumePurchase(options)
                     .then(() => {
                         sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'true')
                     })
@@ -708,8 +706,6 @@
             window.remoteConfigGet = function(options) {
                 if (options) {
                     options = JSON.parse(options)
-                } else {
-                    options = { clientFeatures: [] }
                 }
 
                 bridge.remoteConfig.get(options)
