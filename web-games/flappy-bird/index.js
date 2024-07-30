@@ -38,7 +38,7 @@ window.addEventListener("load", function () {
   var buildUrl = "Build";
   var loaderUrl = buildUrl + "/8ab9ea5c57b025fcd3e9d5441afd0760.loader.js";
   var config = {
-    dataUrl: buildUrl + "/71ae6bac91bd2e5c1f0d4f12d0ce5998.data.unityweb",
+    dataUrl: buildUrl + "/03195849b7af8f6c31328d11f5458636.data.unityweb",
     frameworkUrl: buildUrl + "/b64817455caeeb324f09e8e2ae41872a.framework.js.unityweb",
     codeUrl: buildUrl + "/fe21a0c01d50ddb7175ad2b909b36827.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
