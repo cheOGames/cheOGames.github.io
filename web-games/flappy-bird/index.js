@@ -36,11 +36,11 @@ window.addEventListener("load", function () {
   }
 
   var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/8ab9ea5c57b025fcd3e9d5441afd0760.loader.js";
+  var loaderUrl = buildUrl + "/b9348c036c89f396f7df387e75df23b9.loader.js";
   var config = {
-    dataUrl: buildUrl + "/03195849b7af8f6c31328d11f5458636.data.unityweb",
-    frameworkUrl: buildUrl + "/b64817455caeeb324f09e8e2ae41872a.framework.js.unityweb",
-    codeUrl: buildUrl + "/fe21a0c01d50ddb7175ad2b909b36827.wasm.unityweb",
+    dataUrl: buildUrl + "/5136a1f5f9833ad2ee5568b3245b4c88.data.unityweb",
+    frameworkUrl: buildUrl + "/c29e844057825e6cc995a5e168ae1a6b.framework.js.unityweb",
+    codeUrl: buildUrl + "/d8269de20616ac9ee09c1f27a22cc84c.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
     companyName: "DefaultCompany",
     productName: "Flappy Bird",

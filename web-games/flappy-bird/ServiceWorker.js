@@ -1,9 +1,9 @@
 const cacheName = "DefaultCompany-Flappy Bird-1.0";
 const contentToCache = [
-    "Build/8ab9ea5c57b025fcd3e9d5441afd0760.loader.js",
-    "Build/b64817455caeeb324f09e8e2ae41872a.framework.js.unityweb",
-    "Build/03195849b7af8f6c31328d11f5458636.data.unityweb",
-    "Build/fe21a0c01d50ddb7175ad2b909b36827.wasm.unityweb",
+    "Build/b9348c036c89f396f7df387e75df23b9.loader.js",
+    "Build/c29e844057825e6cc995a5e168ae1a6b.framework.js.unityweb",
+    "Build/5136a1f5f9833ad2ee5568b3245b4c88.data.unityweb",
+    "Build/d8269de20616ac9ee09c1f27a22cc84c.wasm.unityweb",
     "TemplateData/style.css"
 
 ];
