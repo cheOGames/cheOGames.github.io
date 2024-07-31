@@ -1,9 +1,9 @@
-const cacheName = "DefaultCompany-Flappy Bird-1.0";
+const cacheName = "CooLGames-Flappy Bird-1.1";
 const contentToCache = [
-    "Build/b9348c036c89f396f7df387e75df23b9.loader.js",
-    "Build/c29e844057825e6cc995a5e168ae1a6b.framework.js.unityweb",
-    "Build/5136a1f5f9833ad2ee5568b3245b4c88.data.unityweb",
-    "Build/d8269de20616ac9ee09c1f27a22cc84c.wasm.unityweb",
+    "Build/cf7157739665b5fd1c6385a5ba1191c9.loader.js",
+    "Build/5c374e611ef631a59ccfaaef062c21bc.framework.js.unityweb",
+    "Build/4cf2e5085090093a298d92db7ff9c83e.data.unityweb",
+    "Build/f892cd796b0fe7e5a874008191ebb716.wasm.unityweb",
     "TemplateData/style.css"
 
 ];

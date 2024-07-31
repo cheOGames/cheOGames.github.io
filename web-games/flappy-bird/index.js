@@ -36,15 +36,15 @@ window.addEventListener("load", function () {
   }
 
   var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/b9348c036c89f396f7df387e75df23b9.loader.js";
+  var loaderUrl = buildUrl + "/cf7157739665b5fd1c6385a5ba1191c9.loader.js";
   var config = {
-    dataUrl: buildUrl + "/5136a1f5f9833ad2ee5568b3245b4c88.data.unityweb",
-    frameworkUrl: buildUrl + "/c29e844057825e6cc995a5e168ae1a6b.framework.js.unityweb",
-    codeUrl: buildUrl + "/d8269de20616ac9ee09c1f27a22cc84c.wasm.unityweb",
+    dataUrl: buildUrl + "/4cf2e5085090093a298d92db7ff9c83e.data.unityweb",
+    frameworkUrl: buildUrl + "/5c374e611ef631a59ccfaaef062c21bc.framework.js.unityweb",
+    codeUrl: buildUrl + "/f892cd796b0fe7e5a874008191ebb716.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
-    companyName: "DefaultCompany",
+    companyName: "CooLGames",
     productName: "Flappy Bird",
-    productVersion: "1.0",
+    productVersion: "1.1",
     showBanner: unityShowBanner,
   };
 
