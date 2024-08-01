@@ -150,14 +150,14 @@
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/flappy.loader.js'
+                    unityLoader.src = 'Build/web.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/flappy.data.unityweb',
-                                frameworkUrl: 'Build/flappy.framework.js.unityweb',
-                                codeUrl: 'Build/flappy.wasm.unityweb',
+                                dataUrl: 'Build/web.data.unityweb',
+                                frameworkUrl: 'Build/web.framework.js.unityweb',
+                                codeUrl: 'Build/web.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'CooLGames',
                                 productName: 'Flappy Bird',

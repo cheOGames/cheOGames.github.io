@@ -1,9 +1,9 @@
 const cacheName = "CooLGames-Flappy Bird-1.1.6";
 const contentToCache = [
-    "Build/flappy.loader.js",
-    "Build/flappy.framework.js.unityweb",
-    "Build/flappy.data.unityweb",
-    "Build/flappy.wasm.unityweb",
+    "Build/web.loader.js",
+    "Build/web.framework.js.unityweb",
+    "Build/web.data.unityweb",
+    "Build/web.wasm.unityweb",
     "TemplateData/style.css"
 
 ];

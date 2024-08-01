@@ -36,11 +36,11 @@ window.addEventListener("load", function () {
   }
 
   var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/flappy.loader.js";
+  var loaderUrl = buildUrl + "/web.loader.js";
   var config = {
-    dataUrl: buildUrl + "/flappy.data.unityweb",
-    frameworkUrl: buildUrl + "/flappy.framework.js.unityweb",
-    codeUrl: buildUrl + "/flappy.wasm.unityweb",
+    dataUrl: buildUrl + "/web.data.unityweb",
+    frameworkUrl: buildUrl + "/web.framework.js.unityweb",
+    codeUrl: buildUrl + "/web.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
     companyName: "CooLGames",
     productName: "Flappy Bird",
