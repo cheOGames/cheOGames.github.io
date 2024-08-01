@@ -44,7 +44,7 @@ window.addEventListener("load", function () {
     streamingAssetsUrl: "StreamingAssets",
     companyName: "CooLGames",
     productName: "Flappy Bird",
-    productVersion: "1.1.6",
+    productVersion: "1.1.7",
     showBanner: unityShowBanner,
   };
 

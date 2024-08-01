@@ -1,4 +1,4 @@
-const cacheName = "CooLGames-Flappy Bird-1.1.6";
+const cacheName = "CooLGames-Flappy Bird-1.1.7";
 const contentToCache = [
     "Build/web.loader.js",
     "Build/web.framework.js.unityweb",
