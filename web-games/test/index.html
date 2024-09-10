@@ -133,9 +133,6 @@
 
             let bridgeOptions = {
                 platforms: {
-                    'vk_play': {
-                        gameId: '33377'
-                    },
                 }
             }
 
@@ -148,23 +145,23 @@
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
-                    if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                    if (bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
                         bridge.advertisement.showInterstitial()
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/a0eb54968f12b724932ff61ec1f2137c.loader.js'
+                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/cc32b660d217dc9fb90818cf67597cfa.data',
-                                frameworkUrl: 'Build/d18cc1c9fa23007f48a744479868636d.framework.js',
-                                codeUrl: 'Build/efc467d2a1d0813e5f670e122113dd04.wasm',
+                                dataUrl: 'Build/771193c602bb53da0b7fc1b99cf30340.data.unityweb',
+                                frameworkUrl: 'Build/4a1edbdc3e2c85c0d310bd27eb8d3092.framework.js.unityweb',
+                                codeUrl: 'Build/f046d666c43b493d17272da61b4a146e.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheoGames',
                                 productName: 'cheo-game-manager',
-                                productVersion: '1.2.47',
+                                productVersion: '1.2.50',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -212,6 +209,16 @@
 
             window.sendMessageToPlatform = function(message) {
                 bridge.platform.sendMessage(message)
+            }
+
+            window.getServerTime = function() {
+                bridge.platform.getServerTime()
+                    .then(result => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', result.toString())
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', 'false')
+                    })
             }
 
 
@@ -291,7 +298,7 @@
             window.getStorageData = function(key, storageType) {
                 let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-                bridge.storage.get(keys, storageType)
+                bridge.storage.get(keys, storageType, false)
                     .then(data => {
                         if (keys.length > 1) {
                             let values = []
@@ -410,6 +417,16 @@
 
             window.showRewarded = function() {
                 bridge.advertisement.showRewarded()
+            }
+
+            window.checkAdBlock = function() {
+                bridge.advertisement.checkAdBlock()
+                    .then(result => {
+                        sendMessageToUnity('OnCheckAdBlockCompleted', result.toString())
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnCheckAdBlockCompleted', 'false')
+                    })
             }
 
 
@@ -598,11 +615,7 @@
                 bridge.leaderboard.getEntries(options)
                     .then(data => {
                         if (data) {
-                            if (typeof data !== 'string') {
-                                data = JSON.stringify(data)
-                            }
-
-                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', data)
+                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', JSON.stringify(data))
                         } else {
                             sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', '')
                         }
@@ -666,8 +679,6 @@
                                 data = JSON.stringify(data)
                             }
 
-                            data = data.replaceAll('imageURI', 'icon')
-
                             sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
                         } else {
                             sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', '')
@@ -685,9 +696,6 @@
                             if (typeof data !== 'string') {
                                 data = JSON.stringify(data)
                             }
-
-                            data = data.replaceAll('productID', 'id')
-                            data = data.replaceAll('purchaseToken', 'token')
 
                             sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
                         } else {
@@ -710,16 +718,11 @@
 
                 bridge.remoteConfig.get(options)
                     .then(data => {
-                        let keys = Object.keys(data)
-                        let values = []
-
-                        for (let i = 0; i < keys.length; i++) {
-                            let name = keys[i]
-                            let value = data[name]
-                            values.push({ name, value })
+                        if (typeof data !== 'string') {
+                            data = JSON.stringify(data)
                         }
-
-                        sendMessageToUnity('OnRemoteConfigGetSuccess', JSON.stringify(values))
+                        
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', data)
                     })
                     .catch(error => {
                         sendMessageToUnity('OnRemoteConfigGetFailed', '')
