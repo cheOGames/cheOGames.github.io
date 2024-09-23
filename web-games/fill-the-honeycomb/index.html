@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Fill the honeycomb!!!</title>
+        <title>cheo-game-manager</title>
         <style>
             html, body {
                 width: 100%;
@@ -12,7 +12,7 @@
                 margin: 0px;
             }
             .fullscreen {
-                background: grey;
+                background: blue;
                 width: 100%;
                 height: 100%;
                 position: absolute;
@@ -42,14 +42,14 @@
                 border-radius: 25px;
                 width: 50%;
                 height: 30px;
-                background: silver;
+                background: white;
                 padding: 8px;
             }
             #progress-bar-fill {
                 border-radius: 25px;
                 width: 0%;
                 height: 100%;
-                background: gold;
+                background: red;
             }
         </style>
     </head>
@@ -133,8 +133,11 @@
 
             let bridgeOptions = {
                 platforms: {
+                    'vk_play': {
+                        gameId: '33731'
+                    },
                     'telegram': {
-                        adsgramBlockId: '3386'
+                        adsgramBlockId: '3378'
                     },
                 }
             }
@@ -158,13 +161,13 @@
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/e707b7c46e57c1b59eba1a2b336f4dca.data.unityweb',
-                                frameworkUrl: 'Build/27e5b16e9631332b9516011e34b4aca5.framework.js.unityweb',
-                                codeUrl: 'Build/098e22378483554afde064c186d32914.wasm.unityweb',
+                                dataUrl: 'Build/7555decd42572a37aa081aea4a4ffe61.data.unityweb',
+                                frameworkUrl: 'Build/535fbcddc2623f94dbf4f41caf916d8a.framework.js.unityweb',
+                                codeUrl: 'Build/8d4204aef60d72bf5b7779565c9705d6.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
-                                companyName: 'cheOGames',
-                                productName: 'Fill the honeycomb!!!',
-                                productVersion: '1.5.50',
+                                companyName: 'cheoGames',
+                                productName: 'cheo-game-manager',
+                                productVersion: '1.2.53',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
