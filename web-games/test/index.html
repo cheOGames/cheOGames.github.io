@@ -12,7 +12,7 @@
                 margin: 0px;
             }
             .fullscreen {
-                background: #383838;
+                background: blue;
                 width: 100%;
                 height: 100%;
                 position: absolute;
@@ -42,14 +42,14 @@
                 border-radius: 25px;
                 width: 50%;
                 height: 30px;
-                background: #242424;
+                background: white;
                 padding: 8px;
             }
             #progress-bar-fill {
                 border-radius: 25px;
                 width: 0%;
                 height: 100%;
-                background: #FF9A00;
+                background: red;
             }
         </style>
     </head>
@@ -136,6 +136,9 @@
                     'vk_play': {
                         gameId: '33731'
                     },
+                    'telegram': {
+                        adsgramBlockId: '3378'
+                    },
                 }
             }
 
@@ -158,7 +161,7 @@
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/07ab7dc1e82adc9742f02593f762419b.data.unityweb',
+                                dataUrl: 'Build/e49d3eaf35f96ae1b6c3197110b3a986.data.unityweb',
                                 frameworkUrl: 'Build/48fc255b9cfc30e6fe676b1c44809b8e.framework.js.unityweb',
                                 codeUrl: 'Build/582e1dfd2ca68eef21ca6fa64e0abdbe.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
