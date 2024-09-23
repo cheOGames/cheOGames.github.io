@@ -39,15 +39,14 @@
                 margin-bottom: 20px;
             }
             #progress-bar {
-                border-radius: 5px;
-                width: 90%;
-                max-width: 250px;
-                height: 20px;
+                border-radius: 25px;
+                width: 50%;
+                height: 30px;
                 background: silver;
-                padding: 5px;
+                padding: 8px;
             }
             #progress-bar-fill {
-                border-radius: 3px;
+                border-radius: 25px;
                 width: 0%;
                 height: 100%;
                 background: gold;
@@ -149,23 +148,23 @@
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
-                    if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                    if (bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
                         bridge.advertisement.showInterstitial()
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/webGL.loader.js'
+                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/webGL.data.unityweb',
-                                frameworkUrl: 'Build/webGL.framework.js.unityweb',
-                                codeUrl: 'Build/webGL.wasm.unityweb',
+                                dataUrl: 'Build/c1f01f8a3814bf4eb2c326efcf14a18e.data.unityweb',
+                                frameworkUrl: 'Build/27e5b16e9631332b9516011e34b4aca5.framework.js.unityweb',
+                                codeUrl: 'Build/098e22378483554afde064c186d32914.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'Fill the honeycomb!!!',
-                                productVersion: '1.4.52',
+                                productVersion: '1.5.50',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -213,6 +212,16 @@
 
             window.sendMessageToPlatform = function(message) {
                 bridge.platform.sendMessage(message)
+            }
+
+            window.getServerTime = function() {
+                bridge.platform.getServerTime()
+                    .then(result => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', result.toString())
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', 'false')
+                    })
             }
 
 
@@ -292,7 +301,7 @@
             window.getStorageData = function(key, storageType) {
                 let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-                bridge.storage.get(keys, storageType)
+                bridge.storage.get(keys, storageType, false)
                     .then(data => {
                         if (keys.length > 1) {
                             let values = []
@@ -372,12 +381,6 @@
             }
 
             window.setMinimumDelayBetweenInterstitial = function(options) {
-                if (options) {
-                    options = JSON.parse(options)
-                } else {
-                    options = { }
-                }
-                
                 bridge.advertisement.setMinimumDelayBetweenInterstitial(options)
             }
 
@@ -411,16 +414,22 @@
                 bridge.advertisement.hideBanner()
             }
 
-            window.showInterstitial = function(options) {
-                if (options) {
-                    options = JSON.parse(options)
-                }
-
-                bridge.advertisement.showInterstitial(options)
+            window.showInterstitial = function() {
+                bridge.advertisement.showInterstitial()
             }
 
             window.showRewarded = function() {
                 bridge.advertisement.showRewarded()
+            }
+
+            window.checkAdBlock = function() {
+                bridge.advertisement.checkAdBlock()
+                    .then(result => {
+                        sendMessageToUnity('OnCheckAdBlockCompleted', result.toString())
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnCheckAdBlockCompleted', 'false')
+                    })
             }
 
 
@@ -471,8 +480,12 @@
                     })
             }
 
-            window.inviteFriends = function() {
-                bridge.social.inviteFriends()
+            window.inviteFriends = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.social.inviteFriends(options)
                     .then(() => {
                         sendMessageToUnity('OnInviteFriendsCompleted', 'true')
                     })
@@ -549,10 +562,6 @@
                 return bridge.leaderboard.isNativePopupSupported.toString()
             }
 
-            window.getIsLeaderboardMultipleBoardsSupported = function() {
-                return bridge.leaderboard.isMultipleBoardsSupported.toString()
-            }
-
             window.getIsLeaderboardSetScoreSupported = function() {
                 return bridge.leaderboard.isSetScoreSupported.toString()
             }
@@ -609,11 +618,7 @@
                 bridge.leaderboard.getEntries(options)
                     .then(data => {
                         if (data) {
-                            if (typeof data !== 'string') {
-                                data = JSON.stringify(data)
-                            }
-
-                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', data)
+                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', JSON.stringify(data))
                         } else {
                             sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', '')
                         }
@@ -641,8 +646,12 @@
                 return bridge.payments.isSupported.toString()
             }
 
-            window.paymentsPurchase = function(purchaseId) {
-                bridge.payments.purchase(purchaseId)
+            window.paymentsPurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.purchase(options)
                     .then(() => {
                         sendMessageToUnity('OnPaymentsPurchaseCompleted', 'true')
                     })
@@ -651,8 +660,12 @@
                     })
             }
 
-            window.paymentsConsumePurchase = function(purchaseToken) {
-                bridge.payments.consumePurchase(purchaseToken)
+            window.paymentsConsumePurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.consumePurchase(options)
                     .then(() => {
                         sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'true')
                     })
@@ -668,8 +681,6 @@
                             if (typeof data !== 'string') {
                                 data = JSON.stringify(data)
                             }
-
-                            data = data.replaceAll('imageURI', 'icon')
 
                             sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
                         } else {
@@ -689,9 +700,6 @@
                                 data = JSON.stringify(data)
                             }
 
-                            data = data.replaceAll('productID', 'id')
-                            data = data.replaceAll('purchaseToken', 'token')
-
                             sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
                         } else {
                             sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', '')
@@ -709,28 +717,22 @@
             window.remoteConfigGet = function(options) {
                 if (options) {
                     options = JSON.parse(options)
-                } else {
-                    options = { clientFeatures: [] }
                 }
 
                 bridge.remoteConfig.get(options)
                     .then(data => {
-                        let keys = Object.keys(data)
-                        let values = []
-
-                        for (let i = 0; i < keys.length; i++) {
-                            let name = keys[i]
-                            let value = data[name]
-                            values.push({ name, value })
+                        if (typeof data !== 'string') {
+                            data = JSON.stringify(data)
                         }
-
-                        sendMessageToUnity('OnRemoteConfigGetSuccess', JSON.stringify(values))
+                        
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', data)
                     })
                     .catch(error => {
                         sendMessageToUnity('OnRemoteConfigGetFailed', '')
                     })
             }
         </script>
+        
         <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
         <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
