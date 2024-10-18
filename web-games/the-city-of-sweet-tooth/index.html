@@ -34,19 +34,20 @@
                 align-items: center;
             }
             #icon {
-                max-width: 120px;
+                max-width: 100px;
                 border-radius: 10px;
                 margin-bottom: 20px;
             }
             #progress-bar {
-                border-radius: 25px;
-                width: 50%;
-                height: 30px;
+                border-radius: 5px;
+                width: 90%;
+                max-width: 250px;
+                height: 20px;
                 background: orange;
-                padding: 8px;
+                padding: 5px;
             }
             #progress-bar-fill {
-                border-radius: 25px;
+                border-radius: 3px;
                 width: 0%;
                 height: 100%;
                 background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
@@ -60,7 +61,7 @@
             <img id="icon" src="./icon.png" />
             <div id="progress-bar"><div id="progress-bar-fill"></div></div>
         </div>
-        <script src="./instant-games-bridge.js"></script>
+        <script src="./playgama-bridge.js"></script>
         <script>
             if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
                 let meta = document.createElement('meta')
@@ -82,24 +83,32 @@
             // utils
             window.unityInstance = null
             let progressBarFillingInterval = null
+            let progressBarCompleteFillingStarted = false
 
             function sendMessageToUnity(name, value) {
                 if (window.unityInstance !== null) {
-                    window.unityInstance.SendMessage('Bridge', name, value)
+                    window.unityInstance.SendMessage('PlaygamaBridge', name, value)
                 }
             }
 
             function onUnityLoadingProgressChanged(progress) {
-                if (progress === 0.9) {
+                if (progress >= 1 && progressBarFillingInterval !== null) {
+                    clearInterval(progressBarFillingInterval)
+                    progressBarFillingInterval = null
+                    return
+                }
+
+                if (progressBarCompleteFillingStarted) {
+                    return
+                }
+
+                if (progress >= 0.9) {
+                    progressBarCompleteFillingStarted = true
                     completeProgressBarFilling()
                     return
                 }
 
                 progressBarFill.style.width = `${ progress * 100 }%`
-                if (progress === 1 && progressBarFillingInterval !== null) {
-                    clearInterval(progressBarFillingInterval)
-                    progressBarFillingInterval = null
-                }
             }
             
             function completeProgressBarFilling() {
@@ -155,13 +164,13 @@
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/3058d84d093944c6cd83b20c290ffa56.data.unityweb',
-                                frameworkUrl: 'Build/c6f710f7b46c6a8753cfdc0e86d58a4f.framework.js.unityweb',
-                                codeUrl: 'Build/9b2772806dae5bc8cfb935bf025ec1e9.wasm.unityweb',
+                                dataUrl: 'Build/4bb2b5b3bbd1c86d563a867a418a8b4e.data.unityweb',
+                                frameworkUrl: 'Build/951aa47cf31dc04317513df52360a3a4.framework.js.unityweb',
+                                codeUrl: 'Build/323d74c0e0053799c7697d159d83647c.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'Infinity Pixel',
                                 productName: 'The Сity of Sweet Tooth',
-                                productVersion: '1.0.17',
+                                productVersion: '1.1.10',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -729,7 +738,6 @@
                     })
             }
         </script>
-        
         <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
         <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
