@@ -10,6 +10,18 @@
                 height: 100%;
                 padding: 0px;
                 margin: 0px;
+                
+                /* Убираем скролл */
+                overflow: hidden;
+                
+                /* Убираем лонгтап на IOS */
+                -webkit-touch-callout:none;
+                -webkit-user-select:none;
+                -khtml-user-select:none;
+                -moz-user-select:none;
+                -ms-user-select:none;
+                user-select:none;
+                -webkit-tap-highlight-color:rgba(0,0,0,0);
             }
             .fullscreen {
                 background: radial-gradient(ellipse at top, #e66465, transparent), radial-gradient(ellipse at bottom, #4d9f0c, transparent);
@@ -18,6 +30,10 @@
                 position: absolute;
                 top: 0px;
                 left: 0px;
+                /* Добавляем тени по бокам */
+                -webkit-box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
+                -moz-box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
+				box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
             }
             #banner-container {
                 position: absolute;
@@ -34,20 +50,19 @@
                 align-items: center;
             }
             #icon {
-                max-width: 100px;
+                max-width: 120px;
                 border-radius: 10px;
                 margin-bottom: 20px;
             }
             #progress-bar {
-                border-radius: 5px;
-                width: 90%;
-                max-width: 250px;
-                height: 20px;
+                border-radius: 25px;
+                width: 50%;
+                height: 30px;
                 background: orange;
-                padding: 5px;
+                padding: 8px;
             }
             #progress-bar-fill {
-                border-radius: 3px;
+                border-radius: 25px;
                 width: 0%;
                 height: 100%;
                 background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
@@ -159,18 +174,18 @@
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
+                    unityLoader.src = 'Build/46ec74e43436222fe29db490c78779ee.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/4bb2b5b3bbd1c86d563a867a418a8b4e.data.unityweb',
-                                frameworkUrl: 'Build/951aa47cf31dc04317513df52360a3a4.framework.js.unityweb',
-                                codeUrl: 'Build/323d74c0e0053799c7697d159d83647c.wasm.unityweb',
+                                dataUrl: 'Build/4051584ff5607259d5f06261b3d73140.data.unityweb',
+                                frameworkUrl: 'Build/70b1491b4999b2621d6eee9920a8d142.framework.js.unityweb',
+                                codeUrl: 'Build/720128b786d510027aa90a825cd4a94e.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'Infinity Pixel',
                                 productName: 'The Сity of Sweet Tooth',
-                                productVersion: '1.1.10',
+                                productVersion: '1.1.17',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -738,6 +753,8 @@
                     })
             }
         </script>
+        
+        <!-- -------------------------- Подключаем аудио --------------------------- -->
         <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
         <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
