@@ -172,18 +172,18 @@
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/webgl.loader.js'
+                    unityLoader.src = 'Build/3bce32ffada7a59fea7c79b65bc859a6.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/webgl.data.unityweb',
-                                frameworkUrl: 'Build/webgl.framework.js.unityweb',
-                                codeUrl: 'Build/webgl.wasm.unityweb',
+                                dataUrl: 'Build/4f18d9495e9139e1c9b730fd782352fd.data.br',
+                                frameworkUrl: 'Build/d4b83d48e38082b30dd8db3e3187190a.framework.js.br',
+                                codeUrl: 'Build/1924941954797f6302c54a064916f41b.wasm.br',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'buzz-words',
-                                productVersion: '1.2.42',
+                                productVersion: '1.2.5',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
