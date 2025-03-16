@@ -10,6 +10,18 @@
                 height: 100%;
                 padding: 0px;
                 margin: 0px;
+                
+                /* Убираем скролл */
+                overflow: hidden;
+                
+                /* Убираем лонгтап на IOS */
+                -webkit-touch-callout:none;
+                -webkit-user-select:none;
+                -khtml-user-select:none;
+                -moz-user-select:none;
+                -ms-user-select:none;
+                user-select:none;
+                -webkit-tap-highlight-color:rgba(0,0,0,0);
             }
             .fullscreen {
                 background: silver;
@@ -18,6 +30,16 @@
                 position: absolute;
                 top: 0px;
                 left: 0px;
+                /* Добавляем тени по бокам */
+                -webkit-box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
+                -moz-box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
+				box-shadow: 0px 5px 10px 10px rgba(34, 60, 80, 0.2);
+            }
+            #banner-container {
+                position: absolute;
+                bottom: 0px;
+                width: 100%;
+                height: 90px;
             }
             #loading-overlay {
                 font-size: 20px;
@@ -49,11 +71,12 @@
     </head>
     <body>
         <canvas id="canvas" class="fullscreen"></canvas>
+        <div id="banner-container" style="display: none"></div>
         <div id="loading-overlay" class="fullscreen">
             <img id="icon" src="./icon.png" />
             <div id="progress-bar"><div id="progress-bar-fill"></div></div>
         </div>
-        <script src="./instant-games-bridge.js"></script>
+        <script src="./playgama-bridge.js"></script>
         <script>
             if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
                 let meta = document.createElement('meta')
@@ -74,24 +97,32 @@
             // utils
             window.unityInstance = null
             let progressBarFillingInterval = null
+            let progressBarCompleteFillingStarted = false
 
             function sendMessageToUnity(name, value) {
                 if (window.unityInstance !== null) {
-                    window.unityInstance.SendMessage('Bridge', name, value)
+                    window.unityInstance.SendMessage('PlaygamaBridge', name, value)
                 }
             }
 
             function onUnityLoadingProgressChanged(progress) {
-                if (progress === 0.9) {
+                if (progress >= 1 && progressBarFillingInterval !== null) {
+                    clearInterval(progressBarFillingInterval)
+                    progressBarFillingInterval = null
+                    return
+                }
+
+                if (progressBarCompleteFillingStarted) {
+                    return
+                }
+
+                if (progress >= 0.9) {
+                    progressBarCompleteFillingStarted = true
                     completeProgressBarFilling()
                     return
                 }
 
                 progressBarFill.style.width = `${ progress * 100 }%`
-                if (progress === 1 && progressBarFillingInterval !== null) {
-                    clearInterval(progressBarFillingInterval)
-                    progressBarFillingInterval = null
-                }
             }
             
             function completeProgressBarFilling() {
@@ -103,11 +134,11 @@
                 progressBarFill.style.width = `${ currentPercent }%`
                 progressBarFillingInterval = setInterval(() => {
                     currentPercent++
-                    if (currentPercent > 99) {
-                        currentPercent = 99
+                    if (currentPercent > 100) {
+                        currentPercent = 100
                     }
 
-                    progressBarFill.style.width = `${ currentPercent + 1 }%`
+                    progressBarFill.style.width = `${ currentPercent }%`
 
                     if (currentPercent >= 100) {
                         clearInterval(progressBarFillingInterval)
@@ -123,27 +154,36 @@
             })
 
 
+            let bridgeOptions = {
+                platforms: {
+                    'telegram': {
+                        adsgramBlockId: '9001'
+                    },
+                }
+            }
+
             // initialization
             bridge
-                .initialize()
+                .initialize(bridgeOptions)
                 .then(() => {
+                    bridge.advertisement.on('banner_state_changed', state => sendMessageToUnity('OnBannerStateChanged', state))
                     bridge.advertisement.on('interstitial_state_changed', state => sendMessageToUnity('OnInterstitialStateChanged', state))
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/webGL.loader.js'
+                    unityLoader.src = 'Build/webgl.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/webGL.data.unityweb',
-                                frameworkUrl: 'Build/webGL.framework.js.unityweb',
-                                codeUrl: 'Build/webGL.wasm.unityweb',
+                                dataUrl: 'Build/webgl.data.unityweb',
+                                frameworkUrl: 'Build/webgl.framework.js.unityweb',
+                                codeUrl: 'Build/webgl.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'buzz-words',
-                                productVersion: '1.2.35',
+                                productVersion: '1.2.42',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
@@ -158,10 +198,6 @@
                             })
                     }
                     document.body.appendChild(unityLoader)
-					
-					if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX) {
-						bridge.advertisement.showInterstitial()
-					}
                 })
                 .catch(error => console.error(error))
             
@@ -182,6 +218,29 @@
                 } else {
                     return ''
                 }
+            }
+
+            window.getPlatformTld = function() {
+                let tld = bridge.platform.tld
+                if (typeof tld === 'string') {
+                    return tld
+                } else {
+                    return ''
+                }
+            }
+
+            window.sendMessageToPlatform = function(message) {
+                bridge.platform.sendMessage(message)
+            }
+
+            window.getServerTime = function() {
+                bridge.platform.getServerTime()
+                    .then(result => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', result.toString())
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnGetServerTimeCompleted', 'false')
+                    })
             }
 
 
@@ -225,7 +284,11 @@
             }
 
             window.authorizePlayer = function(options) {
-                bridge.player.authorize(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.player.authorize(options)
                     .then(() => {
                         sendMessageToUnity('OnAuthorizeCompleted', 'true')
                     })
@@ -250,10 +313,14 @@
                 return bridge.storage.isSupported(storageType).toString()
             }
 
+            window.getIsStorageAvailable = function(storageType) {
+                return bridge.storage.isAvailable(storageType).toString()
+            }
+
             window.getStorageData = function(key, storageType) {
                 let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-                bridge.storage.get(keys, storageType)
+                bridge.storage.get(keys, storageType, false)
                     .then(data => {
                         if (keys.length > 1) {
                             let values = []
@@ -316,12 +383,16 @@
 
 
             // advertisement
-            window.getIsBannerSupported = function() {
-                return bridge.advertisement.isBannerSupported.toString()
+            window.getInterstitialState = function() {
+                if (bridge.advertisement.interstitialState) {
+                    return bridge.advertisement.interstitialState
+                } else {
+                    return ''
+                }
             }
 
-            window.getIsBannerShowing = function() {
-                return bridge.advertisement.isBannerShowing.toString()
+            window.getIsBannerSupported = function() {
+                return bridge.advertisement.isBannerSupported.toString()
             }
             
             window.getMinimumDelayBetweenInterstitial = function() {
@@ -329,46 +400,38 @@
             }
 
             window.setMinimumDelayBetweenInterstitial = function(options) {
-                bridge.advertisement.setMinimumDelayBetweenInterstitial(JSON.parse(options))
+                bridge.advertisement.setMinimumDelayBetweenInterstitial(options)
             }
 
             window.showBanner = function(options) {
-                bridge.advertisement.showBanner(JSON.parse(options))
-                    .then(() => {
-                        sendMessageToUnity('OnShowBannerCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnShowBannerCompleted', 'false')
-                    })
+                if (options) {
+                    options = JSON.parse(options)
+                } else {
+                    options = { }
+                }
+
+                bridge.advertisement.showBanner(options)
             }
 
             window.hideBanner = function() {
                 bridge.advertisement.hideBanner()
-                    .then(() => {
-                        sendMessageToUnity('OnHideBannerCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnHideBannerCompleted', 'false')
-                    })
             }
 
-            window.showInterstitial = function(options) {
-                bridge.advertisement.showInterstitial(JSON.parse(options))
-                    .then(() => {
-                        sendMessageToUnity('OnShowInterstitialCompleted', 'true')
-                    })
-                    .catch(error => {
-                        sendMessageToUnity('OnShowInterstitialCompleted', 'false')
-                    })
+            window.showInterstitial = function() {
+                bridge.advertisement.showInterstitial()
             }
 
             window.showRewarded = function() {
                 bridge.advertisement.showRewarded()
-                    .then(() => {
-                        sendMessageToUnity('OnShowRewardedCompleted', 'true')
+            }
+
+            window.checkAdBlock = function() {
+                bridge.advertisement.checkAdBlock()
+                    .then(result => {
+                        sendMessageToUnity('OnCheckAdBlockCompleted', result.toString())
                     })
                     .catch(error => {
-                        sendMessageToUnity('OnShowRewardedCompleted', 'false')
+                        sendMessageToUnity('OnCheckAdBlockCompleted', 'false')
                     })
             }
 
@@ -402,8 +465,16 @@
                 return bridge.social.isRateSupported.toString()
             }
 
+            window.getIsExternalLinksAllowed = function() {
+                return bridge.social.isExternalLinksAllowed.toString()
+            }
+
             window.share = function(options) {
-                bridge.social.share(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.share(options)
                     .then(() => {
                         sendMessageToUnity('OnShareCompleted', 'true')
                     })
@@ -412,8 +483,12 @@
                     })
             }
 
-            window.inviteFriends = function() {
-                bridge.social.inviteFriends()
+            window.inviteFriends = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.social.inviteFriends(options)
                     .then(() => {
                         sendMessageToUnity('OnInviteFriendsCompleted', 'true')
                     })
@@ -423,7 +498,11 @@
             }
 
             window.joinCommunity = function(options) {
-                bridge.social.joinCommunity(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.joinCommunity(options)
                     .then(() => {
                         sendMessageToUnity('OnJoinCommunityCompleted', 'true')
                     })
@@ -433,7 +512,11 @@
             }
 
             window.createPost = function(options) {
-                bridge.social.createPost(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.social.createPost(options)
                     .then(() => {
                         sendMessageToUnity('OnCreatePostCompleted', 'true')
                     })
@@ -482,10 +565,6 @@
                 return bridge.leaderboard.isNativePopupSupported.toString()
             }
 
-            window.getIsLeaderboardMultipleBoardsSupported = function() {
-                return bridge.leaderboard.isMultipleBoardsSupported.toString()
-            }
-
             window.getIsLeaderboardSetScoreSupported = function() {
                 return bridge.leaderboard.isSetScoreSupported.toString()
             }
@@ -499,7 +578,11 @@
             }
 
             window.leaderboardSetScore = function(options) {
-                bridge.leaderboard.setScore(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.setScore(options)
                     .then(() => {
                         sendMessageToUnity('OnLeaderboardSetScoreCompleted', 'true')
                     })
@@ -509,7 +592,11 @@
             }
 
             window.leaderboardGetScore = function(options) {
-                bridge.leaderboard.getScore(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.getScore(options)
                     .then(data => {
                         if (data) {
                             if (typeof data !== 'string') {
@@ -527,14 +614,14 @@
             }
 
             window.leaderboardGetEntries = function(options) {
-                bridge.leaderboard.getEntries(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.getEntries(options)
                     .then(data => {
                         if (data) {
-                            if (typeof data !== 'string') {
-                                data = JSON.stringify(data)
-                            }
-
-                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', data)
+                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', JSON.stringify(data))
                         } else {
                             sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', '')
                         }
@@ -545,7 +632,11 @@
             }
 
             window.leaderboardShowNativePopup = function(options) {
-                bridge.leaderboard.showNativePopup(JSON.parse(options))
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.leaderboard.showNativePopup(options)
                     .then(() => {
                         sendMessageToUnity('OnLeaderboardShowNativePopupCompleted', 'true')
                     })
@@ -553,6 +644,182 @@
                         sendMessageToUnity('OnLeaderboardShowNativePopupCompleted', 'false')
                     })
             }
+
+            window.getIsPaymentsSupported = function() {
+                return bridge.payments.isSupported.toString()
+            }
+
+            window.getIsCatalogSupported = function() {
+                return bridge.payments.isGetCatalogSupported.toString()
+            }
+
+            window.getIsPurchaseListSupported = function() {
+                return bridge.payments.isGetPurchasesSupported.toString()
+            }
+
+            window.getIsPurchaseConsumingSupported = function() {
+                return bridge.payments.isConsumePurchaseSupported.toString()
+            }
+
+            window.paymentsPurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.purchase(options)
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            sendMessageToUnity('OnPaymentsPurchaseCompleted', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsPurchaseCompleted', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsPurchaseFailed', '')
+                    })
+            }
+
+            window.paymentsConsumePurchase = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.payments.consumePurchase(options)
+                    .then(() => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsConsumePurchaseCompleted', 'false')
+                    })
+            }
+
+            window.paymentsGetCatalog = function() {
+                bridge.payments.getCatalog()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetCatalogCompletedFailed', 'false')
+                    })
+            }
+
+            window.paymentsGetPurchases = function() {
+                bridge.payments.getPurchases()
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnPaymentsGetPurchasesCompletedFailed', 'false')
+                    })
+            }
+
+            window.getIsRemoteConfigSupported = function() {
+                return bridge.remoteConfig.isSupported.toString()
+            }
+
+            window.remoteConfigGet = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.remoteConfig.get(options)
+                    .then(data => {
+                        if (typeof data !== 'string') {
+                            data = JSON.stringify(data)
+                        }
+                        
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', data)
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnRemoteConfigGetFailed', '')
+                    })
+            }
+
+            window.getIsAchievementsSupported = function() {
+                return bridge.achievements.isSupported.toString()
+            }
+
+            window.getIsGetAchievementsListSupported = function() {
+                return bridge.achievements.isGetListSupported.toString()
+            }
+
+            window.getIsAchievementsNativePopupSupported = function() {
+                return bridge.achievements.isNativePopupSupported.toString()
+            }
+
+            window.achievementsUnlock = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.achievements.unlock(options)
+                    .then(() => {
+                        sendMessageToUnity('OnAchievementsUnlockCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnAchievementsUnlockCompleted', 'false')
+                    })
+            }
+
+            window.achievementsShowNativePopup = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+                
+                bridge.achievements.showNativePopup(options)
+                    .then(() => {
+                        sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'true')
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'false')
+                    })
+            }
+
+            window.achievementsGetList = function(options) {
+                if (options) {
+                    options = JSON.parse(options)
+                }
+
+                bridge.achievements.getList(options)
+                    .then(data => {
+                        if (data) {
+                            if (typeof data !== 'string') {
+                                data = JSON.stringify(data)
+                            }
+
+                            sendMessageToUnity('OnAchievementsGetListCompletedSuccess', data)
+                        } else {
+                            sendMessageToUnity('OnAchievementsGetListCompletedSuccess', '')
+                        }
+                    })
+                    .catch(error => {
+                        sendMessageToUnity('OnAchievementsGetListCompletedFailed', 'false')
+                    })
+            }
         </script>
+        
+        <!-- -------------------------- Подключаем аудио --------------------------- -->
+        <script type="text/javascript" src="./Web Audio Plugin/howler.min.js"></script>
+        <script type="text/javascript" src="./Web Audio Plugin/WebAudio.js"></script>
     </body>
 </html>
