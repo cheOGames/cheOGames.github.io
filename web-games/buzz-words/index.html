@@ -162,14 +162,14 @@
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/8b849e3cb67637e061f783faca2aa169.loader.js'
+                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/b6230e21d95b891408adccade660b914.data.unityweb',
-                                frameworkUrl: 'Build/d4b83d48e38082b30dd8db3e3187190a.framework.js.unityweb',
-                                codeUrl: 'Build/1924941954797f6302c54a064916f41b.wasm.unityweb',
+                                dataUrl: 'Build/fb3d4a1f2a4cacba66ffbbe1575f22bd.data.unityweb',
+                                frameworkUrl: 'Build/2bcbdb6a4929faae41b5025b1eb3348a.framework.js.unityweb',
+                                codeUrl: 'Build/ad5e30e94f3173b2289ba12eb62f3e07.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'buzz-words',
