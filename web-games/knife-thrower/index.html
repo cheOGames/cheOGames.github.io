@@ -12,7 +12,7 @@
                 margin: 0px;
             }
             .fullscreen {
-                background: silver;
+                background: linear-gradient(#2876F9, #ff0000);
                 width: 100%;
                 height: 100%;
                 position: absolute;
@@ -49,7 +49,7 @@
                 border-radius: 25px;
                 width: 0%;
                 height: 100%;
-                background: blue;
+                background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
             }
         </style>
     </head>
@@ -137,7 +137,7 @@
                         gameId: '33340'
                     },
                     'telegram': {
-                        adsgramBlockId: '2954'
+                        adsgramBlockId: '9024'
                     },
                 }
             }
@@ -156,18 +156,18 @@
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
+                    unityLoader.src = 'Build/acf785c8273544f2d49e4e1bd7f095a7.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/6a78d828922996014ff19fe396d486f3.data.unityweb',
-                                frameworkUrl: 'Build/e78bffebdd87f9d3a4a0a80fb36775fb.framework.js.unityweb',
-                                codeUrl: 'Build/d8ac50703e0fdc3c49b50b9cd5d41164.wasm.unityweb',
+                                dataUrl: 'Build/dad4d65262fccba9a22725361c04f611.data.unityweb',
+                                frameworkUrl: 'Build/a795b104d9c19f3858e8ab812d2a859a.framework.js.unityweb',
+                                codeUrl: 'Build/d1d083a5207c112bf0aaa3dbae1ebf78.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'knife_thrower',
-                                productVersion: '1.3.5',
+                                productVersion: '1.3.6',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
