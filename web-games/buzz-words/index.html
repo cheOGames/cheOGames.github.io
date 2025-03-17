@@ -24,7 +24,7 @@
                 -webkit-tap-highlight-color:rgba(0,0,0,0);
             }
             .fullscreen {
-                background: silver;
+                background: linear-gradient(green, red);
                 width: 100%;
                 height: 100%;
                 position: absolute;
@@ -49,14 +49,14 @@
                 width: 90%;
                 max-width: 250px;
                 height: 20px;
-                background: orange;
+                background: gold;
                 padding: 5px;
             }
             #progress-bar-fill {
                 border-radius: 3px;
                 width: 0%;
                 height: 100%;
-                background: red;
+                background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
             }
         </style>
     </head>
@@ -162,18 +162,18 @@
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/29d1eff3b3dbf2670f17755d15ec084f.loader.js'
+                    unityLoader.src = 'Build/28bef2189c29af9a2ba9b12a9258e257.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/36e5e81bdd33b5dbfca110dc6eb25a6e.data.unityweb',
+                                dataUrl: 'Build/4881450b27e36fc78196836bd567ab0c.data.unityweb',
                                 frameworkUrl: 'Build/77d735a189de1f85700d11866e298cb4.framework.js.unityweb',
-                                codeUrl: 'Build/b2b34062c9fb401d09e1f0de89ef96ef.wasm.unityweb',
+                                codeUrl: 'Build/3377d53f365e4730f8938098525fc448.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'cheOGames',
                                 productName: 'buzz-words',
-                                productVersion: '1.2.6',
+                                productVersion: '1.2.7',
                                 // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
                                 // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
                             },
