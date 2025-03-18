@@ -53,11 +53,11 @@ window.addEventListener("load", function ()
   }
 
   var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/4bbd5338d1cb3883ed4449afc1e1577c.loader.js";
+  var loaderUrl = buildUrl + "/ebfece34d1fc7ed4120823e107726630.loader.js";
   var config = {
-    dataUrl: buildUrl + "/c3dc33b74c834805b3fedea10901aa7b.data.unityweb",
-    frameworkUrl: buildUrl + "/5e9e0972651269a163002e1e7146e4b9.framework.js.unityweb",
-    codeUrl: buildUrl + "/6f24c60ee04fb03fdd0d36f9985a684c.wasm.unityweb",
+    dataUrl: buildUrl + "/41e6348e2b8f4e8a0cf3c5d3e3a86f52.data.br",
+    frameworkUrl: buildUrl + "/39315f4a8fd72e0da54e7b4129d49f37.framework.js.br",
+    codeUrl: buildUrl + "/3ef04046836dd7342eecc3c249e7cf8a.wasm.br",
     streamingAssetsUrl: "StreamingAssets",
     companyName: "cheOGame",
     productName: "tonconnectunity-template",
