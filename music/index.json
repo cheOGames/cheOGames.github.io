@@ -1,0 +1,18 @@
+{
+	"tracks": [
+		{
+			"folder": "Imagine",
+			"files": [
+				"Imagine_Dragons_-_Thunder.mp3",
+				"cover.jpg"
+			]
+		},
+		{
+			"folder": "Scorpions",
+			"files": [
+				"Scorpions_-_Wind_Of_Change.mp3",
+				"cover.jpg"
+			]
+		}
+	]
+}
